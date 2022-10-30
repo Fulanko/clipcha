@@ -1,0 +1,11 @@
+{
+  "name": "captcha-solver",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "license": "MIT",
+  "dependencies": {
+    "puppeteer": "^19.2.0",
+    "superagent": "^8.0.3"
+  }
+}
