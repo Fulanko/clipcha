@@ -37,7 +37,6 @@ function delay(time) {
   // captcha link
   let iframe = await page.waitForSelector("iframe");
   console.log("iframe found");
-  await delay(2000);
   let frame = await iframe.contentFrame();
   const captchaLink = "#checkbox";
   await frame.waitForSelector(captchaLink);
@@ -66,18 +65,27 @@ function delay(time) {
     };
   });
 
+  const nodes = await frame.$$(`.image-wrapper .image`);
+
+  let requests = [];
   for (let i in images) {
-    ((id) => {
+    requests.push(
       superagent
         .post("http://localhost:5000/images")
         .type("form")
         .field("word", word)
         .field("url", images[i])
-        .end((err, res) => {
-          console.log(id, res.body);
-        });
-    })(i);
+    );
+  }
+  const results = await Promise.all(requests);
+
+  for (let i in results) {
+    console.log(results[i].body);
+    if (results[i].body == true) {
+      await nodes[i].click();
+      await nodes[i].dispose();
+    }
   }
 
-  //await browser.close();
+  await browser.close();
 })();
