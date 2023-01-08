@@ -1,11 +1,8 @@
-import puppeteer from "puppeteer";
-import superagent from "superagent";
-
-function delay(time) {
-  return new Promise(function (resolve) {
-    setTimeout(resolve, time);
-  });
-}
+import { executablePath } from "puppeteer";
+import puppeteer from "puppeteer-extra";
+import StealthPlugin from "puppeteer-extra-plugin-stealth";
+import { solve_hcaptcha } from "./solvers/hcaptcha.js";
+puppeteer.use(StealthPlugin());
 
 (async () => {
   const browser = await puppeteer.launch({
@@ -17,8 +14,10 @@ function delay(time) {
       "--disable-features=IsolateOrigins",
       "--disable-site-isolation-trials",
     ],
+    executablePath: executablePath(),
   });
   const page = await browser.newPage();
+  await page.setViewport({ width: 1920, height: 1080 })
 
   page.on("console", async (msg) => {
     const msgArgs = msg.args();
@@ -27,68 +26,9 @@ function delay(time) {
     }
   });
 
-  await page.goto("https://esearch.ipd.gov.hk/nis-pos-view/#/?lang=en");
-
-  // patent link
-  const patentLink = "img[src='app/assets/images/patentSearch.png']";
-  await page.waitForSelector(patentLink);
-  await page.click(patentLink);
-
-  // captcha link
-  let iframe = await page.waitForSelector("iframe");
-  console.log("iframe found");
-  let frame = await iframe.contentFrame();
-  const captchaLink = "#checkbox";
-  await frame.waitForSelector(captchaLink);
-  console.log("captcha found");
-  await frame.click(captchaLink);
-
-  const imageLink = ".image";
-  await delay(2000);
-
-  iframe = await page.waitForSelector(
-    "iframe[title='Main content of the hCaptcha challenge']"
-  );
-  frame = await iframe.contentFrame();
-  console.log("images found");
-
-  // retrieve searched word and list of challenges
-  const { word, images } = await frame.evaluate(() => {
-    return {
-      word: document
-        .querySelector(".prompt-text span")
-        .innerHTML.split("containing")
-        .pop()
-        .trim(),
-      images: [...document.querySelectorAll(".image-wrapper .image")].map(
-        (x, index) => {
-          return {
-            index: index,
-            url: x.style.background.match(/url\(["']?([^"']*)["']?\)/)[1]
-          }
-        }
-      ),
-    };
-  });
-
-  const nodes = await frame.$$(`.image-wrapper .image`);
-
-  // send requests to CLIP for each challenge
-  let result = await superagent
-    .post("http://localhost:5000/images")
-    .type("form")
-    .field("word", word)
-    .field("images", JSON.stringify(images));
-  let results = result.body;
-
-  // solve challenge
-  for (let i in results) {
-    console.log(i, results[i]);
-    if (results[i] >= 0.75) {
-      await nodes[i].click();
-      await nodes[i].dispose();
-    }
-  }
-
+  //await page.goto("https://esearch.ipd.gov.hk/nis-pos-view/#/?lang=en");
+  await page.goto("https://accounts.hcaptcha.com/demo");
+  await solve_hcaptcha(page);
+  
   //await browser.close();
 })();

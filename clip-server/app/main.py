@@ -35,7 +35,7 @@ async def create_upload_file(images: str = Form(...), word: str = Form(...)):
         result = dict()
         for image in images:
             response = requests.get(image['url'])
-            result[image['index']] = evaluator.evaluate(Image.open(BytesIO(response.content)), word)
+            result[image['index']] = evaluator.evaluate(Image.open(BytesIO(response.content)), word, image['index'])
         return result
     except ValueError as e:
         return {"message": "Invalid images. needs to be a json array of image objects"}

@@ -17,7 +17,7 @@ class Evaluator:
 
   # Evaluate a given image and word pair
   # returns a tuple of (pair_score, top_word)
-  def evaluate(self, image, word):
+  def evaluate(self, image, word, id):
 
     word = word.strip().lower()
     words = [word, "animal", "plant", "building", "vehicule", "street", "food", "something"]
@@ -37,7 +37,7 @@ class Evaluator:
     values, indices = similarity[0].sort(descending=True)
     score = 0
     for value, index in zip(values, indices):
-      print(f"{words[index]:>16s}: {1*value.item():.2f}")
+      print(f"{id} | {words[index]:>16s}: {1*value.item():.2f}")
       if words[index] == word:
         score = 1*value.item()
 
