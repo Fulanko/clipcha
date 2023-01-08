@@ -52,6 +52,7 @@ function delay(time) {
   frame = await iframe.contentFrame();
   console.log("images found");
 
+  // retrieve searched word and list of challenges
   const { word, images } = await frame.evaluate(() => {
     return {
       word: document
@@ -60,32 +61,34 @@ function delay(time) {
         .pop()
         .trim(),
       images: [...document.querySelectorAll(".image-wrapper .image")].map(
-        (x) => x.style.background.match(/url\(["']?([^"']*)["']?\)/)[1]
+        (x, index) => {
+          return {
+            index: index,
+            url: x.style.background.match(/url\(["']?([^"']*)["']?\)/)[1]
+          }
+        }
       ),
     };
   });
 
   const nodes = await frame.$$(`.image-wrapper .image`);
 
-  let requests = [];
-  for (let i in images) {
-    requests.push(
-      superagent
-        .post("http://localhost:5000/images")
-        .type("form")
-        .field("word", word)
-        .field("url", images[i])
-    );
-  }
-  const results = await Promise.all(requests);
+  // send requests to CLIP for each challenge
+  let result = await superagent
+    .post("http://localhost:5000/images")
+    .type("form")
+    .field("word", word)
+    .field("images", JSON.stringify(images));
+  let results = result.body;
 
+  // solve challenge
   for (let i in results) {
-    console.log(results[i].body);
-    if (results[i].body == true) {
+    console.log(i, results[i]);
+    if (results[i] >= 0.75) {
       await nodes[i].click();
       await nodes[i].dispose();
     }
   }
 
-  await browser.close();
+  //await browser.close();
 })();

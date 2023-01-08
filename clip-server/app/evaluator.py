@@ -12,6 +12,7 @@ class Evaluator:
     self.model, self.preprocess = clip.load(os.getenv('CLIP_MODEL'), device=self.device)
 
     print(" ===== Load complete ===== ")
+    print(clip.available_models())
 
 
   # Evaluate a given image and word pair
@@ -19,7 +20,7 @@ class Evaluator:
   def evaluate(self, image, word):
 
     word = word.strip().lower()
-    words = [word, "not " + word]
+    words = [word, "animal", "plant", "building", "vehicule", "street", "food", "something"]
 
     text = clip.tokenize(words).to(self.device)
 
@@ -40,4 +41,4 @@ class Evaluator:
       if words[index] == word:
         score = 1*value.item()
 
-    return score >= 0.5
+    return score

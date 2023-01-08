@@ -5,6 +5,7 @@ from .evaluator import Evaluator
 from PIL import Image
 import requests
 from io import BytesIO
+import json
 
 version = f"{sys.version_info.major}.{sys.version_info.minor}"
 
@@ -27,10 +28,14 @@ async def read_root():
     return {"message": message}
 
 @app.post("/images")
-async def create_upload_file(url: str = Form(...), word: str = Form(...)):
+async def create_upload_file(images: str = Form(...), word: str = Form(...)):
 
-    response = requests.get(url)
-
-    match = evaluator.evaluate(Image.open(BytesIO(response.content)), word)
-
-    return match
+    try:
+        images = json.loads(images)
+        result = dict()
+        for image in images:
+            response = requests.get(image['url'])
+            result[image['index']] = evaluator.evaluate(Image.open(BytesIO(response.content)), word)
+        return result
+    except ValueError as e:
+        return {"message": "Invalid images. needs to be a json array of image objects"}
