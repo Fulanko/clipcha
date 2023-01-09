@@ -3,9 +3,8 @@ from fastapi import FastAPI, Form
 from fastapi.middleware.cors import CORSMiddleware
 from .evaluator import Evaluator
 from PIL import Image
-import requests
 from io import BytesIO
-import json
+import base64
 
 version = f"{sys.version_info.major}.{sys.version_info.minor}"
 
@@ -28,14 +27,6 @@ async def read_root():
     return {"message": message}
 
 @app.post("/images")
-async def create_upload_file(images: str = Form(...), word: str = Form(...)):
-
-    try:
-        images = json.loads(images)
-        result = dict()
-        for image in images:
-            response = requests.get(image['url'])
-            result[image['index']] = evaluator.evaluate(Image.open(BytesIO(response.content)), word, image['index'])
-        return result
-    except ValueError as e:
-        return {"message": "Invalid images. needs to be a json array of image objects"}
+async def create_upload_file(word: str = Form(...), index: int = Form(...), image: str = Form(...)):
+    content = base64.b64decode(image)
+    return evaluator.evaluate(Image.open(BytesIO(content)), word, index)

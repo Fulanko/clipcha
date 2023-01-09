@@ -8,37 +8,40 @@ const submitButton = ".button-submit";
 
 async function step(frame) {
     // retrieve searched word and list of challenges
-    const { word, images } = await frame.evaluate(() => {
-        return {
-            word: document
+    const nodes = await frame.$$(`.image-wrapper .image`);
+    let images = [];
+    for (let i = 0; i < nodes.length; i++) {
+        let content = await nodes[i].screenshot({ encoding: "base64" });
+        images[i] = {
+            index: i,
+            content: content,
+            //url: images[i].style.background.match(/url\(["']?([^"']*)["']?\)/)[1]
+        };
+        console.log(content.length)
+    }
+
+    const word = await frame.evaluate(() => {
+        return document
             .querySelector(".prompt-text span")
             .innerHTML.split("containing")
             .pop()
-            .trim(),
-            images: [...document.querySelectorAll(".image-wrapper .image")].map(
-                (x, index) => {
-                    return {
-                        index: index,
-                        url: x.style.background.match(/url\(["']?([^"']*)["']?\)/)[1]
-                    }
-                }
-            ),
-        };
+            .trim();
     });
 
-    const nodes = await frame.$$(`.image-wrapper .image`);
-
     // send requests to CLIP for each challenge
-    let result = await superagent
-    .post("http://localhost:5000/images")
-    .type("form")
-    .field("word", word)
-    .field("images", JSON.stringify(images));
-    let results = result.body;
+    let results = [];
+    for (var image of images) {
+        let result = await superagent
+            .post("http://localhost:5000/images")
+            .type("form")
+            .field("word", word)
+            .field("index", image.index)
+            .field("image", image.content);
+        results.push(result.body);
+    }
 
     // solve challenge
     for (let i in results) {
-        console.log(i, results[i]);
         if (results[i] >= 0.8) {
             await nodes[i].click();
             await nodes[i].dispose();
