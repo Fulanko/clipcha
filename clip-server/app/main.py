@@ -1,10 +1,11 @@
 import sys
-from fastapi import FastAPI, Form
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from .evaluator import Evaluator
 from PIL import Image
 from io import BytesIO
 import base64
+import time
 
 version = f"{sys.version_info.major}.{sys.version_info.minor}"
 
@@ -27,6 +28,14 @@ async def read_root():
     return {"message": message}
 
 @app.post("/images")
-async def create_upload_file(word: str = Form(...), index: int = Form(...), image: str = Form(...)):
-    content = base64.b64decode(image)
-    return evaluator.evaluate(Image.open(BytesIO(content)), word, index)
+async def create_upload_file(request: Request):
+    
+    json = await request.json()
+    content = base64.b64decode(json["image"])
+    img = Image.open(BytesIO(content))
+    start = time.time()
+    res = evaluator.evaluate(img, json["word"], json["index"])
+    end = time.time()
+    print("time")
+    print(end - start)
+    return res

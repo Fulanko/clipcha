@@ -17,7 +17,7 @@ async function step(frame) {
             content: content,
             //url: images[i].style.background.match(/url\(["']?([^"']*)["']?\)/)[1]
         };
-        console.log(content.length)
+        console.log(i, "image content length", content.length)
     }
 
     const word = await frame.evaluate(() => {
@@ -31,12 +31,16 @@ async function step(frame) {
     // send requests to CLIP for each challenge
     let results = [];
     for (var image of images) {
+        console.time('request')
         let result = await superagent
             .post("http://localhost:5000/images")
-            .type("form")
-            .field("word", word)
-            .field("index", image.index)
-            .field("image", image.content);
+            .type("json")
+            .send({
+              word: word,
+              index: image.index,
+              image: image.content
+            });
+        console.timeEnd('request')
         results.push(result.body);
     }
 
@@ -72,7 +76,7 @@ export async function solve_hcaptcha(page) {
     const challengeCount = await frame.evaluate(() => {
         return Array.from(document.querySelectorAll(".challenge-breadcrumbs .Crumb")).length || 1;
     });
-    console.log(challengeCount)
+    console.log("challengeCount", challengeCount)
 
     var progress = 0;
 
