@@ -8,6 +8,7 @@ const submitButton = ".button-submit";
 
 async function step(frame) {
     // retrieve searched word and list of challenges
+    await delay(1000);
     const {word, images} = await frame.evaluate(() => {
         return {
             word: document

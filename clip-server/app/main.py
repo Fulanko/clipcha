@@ -33,6 +33,7 @@ def read_root():
 def create_upload_file(word: str = Form(...), images: str = Form(...)):
     images = json.loads(images)
     results = []
+    evaluator.tokenize(word)
     for image in images:
         file = requests.get(image['url']).content;
         results.append(evaluator.evaluate(Image.open(BytesIO(file)), word, image['index']))
