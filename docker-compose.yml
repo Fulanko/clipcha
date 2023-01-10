@@ -13,7 +13,7 @@ services:
     container_name: clip-server-dev
     environment:
       - GUNICORN_CMD_ARGS="--keep-alive 0"
-      - CLIP_MODEL=ViT-L/14
+      - CLIP_MODEL=ViT-B/32 #L/14
     volumes:
       - ./clip-server/app:/code/app
     command: bash -c "uvicorn app.main:app --host 0.0.0.0 --port 5000"

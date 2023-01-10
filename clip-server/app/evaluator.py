@@ -1,6 +1,7 @@
 import os
 import torch
 import clip
+import time
 
 class Evaluator:
 
@@ -23,14 +24,22 @@ class Evaluator:
     words = [word, "animal", "plant", "building", "vehicule", "street", "food", "something"]
 
     text = clip.tokenize(words).to(self.device)
+   
 
+    start = time.time()
     with torch.no_grad():
         self.text_features = self.model.encode_text(text)
+    end = time.time()
+    print(end - start)
 
     # compute CLIP features
+    start = time.time()
     image = self.preprocess(image).unsqueeze(0).to(self.device)
     with torch.no_grad():
         image_features = self.model.encode_image(image)
+    end = time.time()
+    print(end - start)
+
     image_features /= image_features.norm(dim=-1, keepdim=True)
     self.text_features /= self.text_features.norm(dim=-1, keepdim=True)
     similarity = (100.0 * image_features @ self.text_features.T).softmax(dim=-1)

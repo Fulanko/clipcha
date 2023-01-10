@@ -8,51 +8,45 @@ const submitButton = ".button-submit";
 
 async function step(frame) {
     // retrieve searched word and list of challenges
-    const nodes = await frame.$$(`.image-wrapper .image`);
-    let images = [];
-    for (let i = 0; i < nodes.length; i++) {
-        let content = await nodes[i].screenshot({ encoding: "base64" });
-        images[i] = {
-            index: i,
-            content: content,
-            //url: images[i].style.background.match(/url\(["']?([^"']*)["']?\)/)[1]
-        };
-        console.log(content.length)
-    }
-
-    const word = await frame.evaluate(() => {
-        return document
+    const {word, images} = await frame.evaluate(() => {
+        return {
+            word: document
             .querySelector(".prompt-text span")
             .innerHTML.split("containing")
             .pop()
-            .trim();
+            .trim(),
+            images: [...document.querySelectorAll(`.image-wrapper .image`)].map((x, i) => {
+                return {
+                    index: i,
+                    url: x.style.background.match(/url\(["']?([^"']*)["']?\)/)[1]
+                }
+            })
+        }
     });
 
     // send requests to CLIP for each challenge
-    let results = [];
-    for (var image of images) {
-        let result = await superagent
-            .post("http://localhost:5000/images")
-            .type("form")
-            .field("word", word)
-            .field("index", image.index)
-            .field("image", image.content);
-        results.push(result.body);
-    }
+    let results = await superagent
+        .post("http://localhost:5000/images")
+        .type("form")
+        .field("word", word)
+        .field("images", JSON.stringify(images));
+    let solutions = results.body;
 
     // solve challenge
-    for (let i in results) {
-        if (results[i] >= 0.8) {
+    const nodes = await frame.$$(`.image-wrapper .image`);
+    for (let i in solutions) {
+        if (solutions[i] >= 0.8) {
             await nodes[i].click();
             await nodes[i].dispose();
+            //await delay(1000);
         }
     }
 }
 
 export async function solve_hcaptcha(page) {
     // patent link
-    //await page.waitForSelector(patentLink);
-    //await page.click(patentLink);
+    // await page.waitForSelector(patentLink);
+    // await page.click(patentLink);
 
     // captcha link
     let iframe = await page.waitForSelector("iframe");
@@ -85,6 +79,6 @@ export async function solve_hcaptcha(page) {
         progress++;
 
         // wait
-        await delay(1000);
+        //await delay(1000);
     }
 }

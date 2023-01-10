@@ -5,6 +5,9 @@ from .evaluator import Evaluator
 from PIL import Image
 from io import BytesIO
 import base64
+import requests
+import json
+
 
 version = f"{sys.version_info.major}.{sys.version_info.minor}"
 
@@ -22,11 +25,15 @@ app.add_middleware(
 )
 
 @app.get("/")
-async def read_root():
+def read_root():
     message = f"Hello world! From FastAPI running on Uvicorn with Gunicorn. Using Python {version}"
     return {"message": message}
 
 @app.post("/images")
-async def create_upload_file(word: str = Form(...), index: int = Form(...), image: str = Form(...)):
-    content = base64.b64decode(image)
-    return evaluator.evaluate(Image.open(BytesIO(content)), word, index)
+def create_upload_file(word: str = Form(...), images: str = Form(...)):
+    images = json.loads(images)
+    results = []
+    for image in images:
+        file = requests.get(image['url']).content;
+        results.append(evaluator.evaluate(Image.open(BytesIO(file)), word, image['index']))
+    return results
