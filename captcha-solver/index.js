@@ -28,7 +28,7 @@ puppeteer.use(StealthPlugin());
 
   //await page.goto("https://esearch.ipd.gov.hk/nis-pos-view/#/?lang=en");
   await page.goto("https://accounts.hcaptcha.com/demo");
-  await solve_hcaptcha(page);
+  await solve_hcaptcha(page, 1000, 1000);
   
   //await browser.close();
 })();
