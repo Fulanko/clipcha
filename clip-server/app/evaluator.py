@@ -31,6 +31,9 @@ class Evaluator:
   # Evaluate a given image and word pair
   # returns a tuple of (pair_score, top_word)
   def evaluate(self, image, word, id):
+    # turn image black and white
+    image.convert("1")
+
     # compute CLIP features
     image = self.preprocess(image).unsqueeze(0).to(self.device)
     with torch.no_grad():
