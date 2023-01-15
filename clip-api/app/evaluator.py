@@ -1,7 +1,6 @@
 import os
 import torch
 import clip
-import time
 
 class Evaluator:
 
