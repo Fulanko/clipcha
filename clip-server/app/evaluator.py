@@ -19,7 +19,8 @@ class Evaluator:
   
   def tokenize(self, word):
     word = word.strip().lower()
-    self.words = [word, "animal", "plant", "flower", "building", "vehicule", "street", "food", "instrument", "something"]
+    self.words = [word, "an animal", "a plant", "a building", "a vehicule", "a street", "food", "an instrument", "something"]
+    self.words = ["a picture containing " + s for s in self.words]
 
     text = clip.tokenize(self.words).to(self.device)
    
@@ -44,7 +45,7 @@ class Evaluator:
     i = 0
     for value, index in zip(values, indices):
       print(f"{id} | {self.words[index]:>16s}: {1*value.item():.2f}")
-      if self.words[index] == word:
+      if self.words[index] == "a picture containing " + word:
         score = 1*value.item()
         rank = i
       i += 1
