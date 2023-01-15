@@ -19,7 +19,7 @@ class Evaluator:
   
   def tokenize(self, word):
     word = word.strip().lower()
-    self.words = [word, "animal", "plant", "building", "vehicule", "street", "food", "instrument", "something"]
+    self.words = [word, "animal", "plant", "flower", "building", "vehicule", "street", "food", "instrument", "something"]
 
     text = clip.tokenize(self.words).to(self.device)
    
@@ -40,9 +40,13 @@ class Evaluator:
     similarity = (100.0 * image_features @ self.text_features.T).softmax(dim=-1)
     values, indices = similarity[0].sort(descending=True)
     score = 0
+    rank = -1
+    i = 0
     for value, index in zip(values, indices):
       print(f"{id} | {self.words[index]:>16s}: {1*value.item():.2f}")
       if self.words[index] == word:
         score = 1*value.item()
+        rank = i
+      i += 1
 
-    return score
+    return {"score": score, "rank": rank}

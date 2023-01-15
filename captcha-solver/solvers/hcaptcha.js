@@ -40,7 +40,7 @@ async function step(frame) {
     // solve challenge
     const nodes = await frame.$$(imageSelector);
     for (let i in solutions) {
-        if (solutions[i] >= 0.8) {
+        if (solutions[i].score >= 0.8) {
             await nodes[i].click();
             await nodes[i].dispose();
         }
