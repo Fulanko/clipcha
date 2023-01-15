@@ -19,7 +19,7 @@ class Evaluator:
   
   def tokenize(self, word):
     word = word.strip().lower()
-    self.words = [word, "animal", "plant", "building", "vehicule", "street", "food", "something"]
+    self.words = [word, "animal", "plant", "building", "vehicule", "street", "food", "instrument", "something"]
 
     text = clip.tokenize(self.words).to(self.device)
    

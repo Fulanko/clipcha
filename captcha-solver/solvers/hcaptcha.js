@@ -8,7 +8,7 @@ const submitButton = ".button-submit";
 const breadcrumbSelector = ".challenge-breadcrumbs .Crumb";
 const promptSelector = ".prompt-text span";
 const imageSelector = ".image-wrapper .image";
-const errorSelector = ".display-error";
+const checkSelector = ".check";
 
 async function step(frame, solverDelay = 1000) {
     // retrieve searched word and list of challenges
@@ -47,7 +47,14 @@ async function step(frame, solverDelay = 1000) {
     }
 }
 
-export async function solve_hcaptcha(page, initialDelay = 1000, solverDelay = 1000) {
+async function get_challenge_count(frame, selector, selectorDelay = 500) {
+    await delay(selectorDelay);
+    return await frame.evaluate((selector) => {
+        return Array.from(document.querySelectorAll(selector)).length || 1;
+    }, selector);
+}
+
+export async function solve_hcaptcha(page, selectorDelay = 500, solverDelay = 1000) {
     // patent link
     // await page.waitForSelector(patentLink);
     // await page.click(patentLink);
@@ -55,21 +62,19 @@ export async function solve_hcaptcha(page, initialDelay = 1000, solverDelay = 10
     // captcha link
     let iframe = await page.waitForSelector("iframe");
     console.log("iframe found");
-    let frame = await iframe.contentFrame();
-    await frame.waitForSelector(captchaLink);
+    let captchaCheckbox = await iframe.contentFrame();
+    await captchaCheckbox.waitForSelector(captchaLink);
     console.log("captcha found");
-    await frame.click(captchaLink);
+    await captchaCheckbox.click(captchaLink);
 
     // wait
-    await delay(initialDelay);
+    await delay(selectorDelay);
     iframe = await page.waitForSelector(captchaIframe);
-    frame = await iframe.contentFrame();
+    let frame = await iframe.contentFrame();
     console.log("images found");
 
     // count challenges
-    let challengeCount = await frame.evaluate((breadcrumbSelector) => {
-        return Array.from(document.querySelectorAll(breadcrumbSelector)).length || 1;
-    }, breadcrumbSelector);
+    let challengeCount = await get_challenge_count(frame, breadcrumbSelector, selectorDelay);
 
     var progress = 0;
 
@@ -83,17 +88,15 @@ export async function solve_hcaptcha(page, initialDelay = 1000, solverDelay = 10
         console.log(`${progress} / ${challengeCount}`)
 
         // fail check
-        await delay(500);
-        const error = await frame.evaluate((errorSelector) => 
-          document.querySelector(errorSelector).getAttribute("aria-hidden")
-        , errorSelector) == "false";
-        
-        if (error) {
-            console.log("reset")
+        await delay(selectorDelay);
+        const solved = await captchaCheckbox.evaluate((checkSelector) => {
+            return document.querySelector(checkSelector).style.display
+        }, checkSelector) == "block";
+
+        if (progress == challengeCount && !solved) {
             progress = 0;
-            challengeCount = await frame.evaluate((breadcrumbSelector) => {
-                return Array.from(document.querySelectorAll(breadcrumbSelector)).length || 1;
-            }, breadcrumbSelector);
+            challengeCount = await get_challenge_count(frame, breadcrumbSelector, selectorDelay);
+            console.log("reset", challengeCount)
         }
     }
 }
