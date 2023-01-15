@@ -6,8 +6,8 @@ Experiment on the feasability to solve captchas using puppeteer and a simple CLI
 If using puppeteer with the API, make sure to use the StealthPlugin, to avoid being detected as a bot
 
 ### Samples
-`node captcha-solver/index.js
-`
+`docker compose up -d clip-api`  
+`node captcha-solver/index.js`
 
 ### Node Parameters (config.js)
 | Setting         | Explanation |
