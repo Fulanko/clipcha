@@ -45,11 +45,13 @@ class Evaluator:
     score = 0
     rank = -1
     i = 0
+    results = dict()
     for value, index in zip(values, indices):
+      results[self.words[index]] = 1*value.item()
       print(f"{id} | {self.words[index]:>16s}: {1*value.item():.2f}")
       if self.words[index] == "a picture containing " + word:
         score = 1*value.item()
         rank = i
       i += 1
 
-    return {"score": score, "rank": rank}
+    return {"score": score, "rank": rank, "results": results}
