@@ -2,7 +2,7 @@ import os
 import torch
 import clip
 
-class Evaluator:
+class ClipEvaluator:
 
   # Initialize CUDA and CLIP
   # Assemble word list for CLIP, consisting of
@@ -12,7 +12,7 @@ class Evaluator:
     self.model, self.preprocess = clip.load(os.getenv('CLIP_MODEL'), device=self.device)
     self.words = []
 
-    print(" ===== Load complete ===== ")
+    print(" ===== Loaded CLIP ===== ")
     print(clip.available_models())
 
   

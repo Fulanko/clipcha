@@ -3,7 +3,7 @@ version: "3.4"
 services:
   clip-api:
     build:
-      context: ./clip-api
+      context: ./api
       dockerfile: Dockerfile
       args:
         COMPUTE: cpu # cpu, cuda
@@ -14,6 +14,7 @@ services:
     environment:
       - GUNICORN_CMD_ARGS="--keep-alive 0"
       - CLIP_MODEL=ViT-B/32 #B/32, L/14
+      - TESSDATA_PREFIX=/code/app/tessdata
     volumes:
-      - ./clip-api/app:/code/app
-    command: bash -c "uvicorn app.main:app --host 0.0.0.0 --port 5000"
+      - ./api/app:/code/app
+    command: bash -c "uvicorn main:app --host 0.0.0.0 --port 5000 --app-dir app"

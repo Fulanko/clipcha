@@ -14,12 +14,17 @@ RUN pip3 install torch==1.10.0+cpu torchvision==0.11.1+cpu torchaudio==0.10.0+cp
 ############### SOURCE STAGE ###############
 FROM pytorch_${COMPUTE} 
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 WORKDIR /code
 
 COPY ./requirements.txt /code/requirements.txt
 
+RUN apt update \
+  && apt-get install ffmpeg libsm6 libxext6 -y
+
 RUN pip3 install --no-cache-dir --upgrade -r /code/requirements.txt \ 
- && pip3 install ftfy regex tqdm python-multipart requests \
+ && pip3 install ftfy regex tqdm python-multipart requests pillow numpy easyocr blend_modes\
  && pip3 install git+https://github.com/openai/CLIP.git
 
 COPY /app /code/app
