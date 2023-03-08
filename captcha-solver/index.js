@@ -15,15 +15,15 @@ async function demo_hk(page) {
 }
 
 async function demo_cn(page) {
-  page.goto("http://cpquery.cnipa.gov.cn/", {waitUntil: 'domcontentloaded'});
+  page.goto("http://cpquery.cnipa.gov.cn/", {waitUntil: 'domcontentloaded', timeout: 0});
   await solve_jcaptcha_text_image(page);
   const tokenInput = "#attention_token";
   const feeDataUrl = "http://cpquery.cnipa.gov.cn/txnQueryFeeData.do";
-  await page.waitForSelector(tokenInput);
+  await page.waitForSelector(tokenInput, {timeout: 0});
   let input = await page.$(tokenInput);
   const token = await page.evaluate(el => el.value, input);
   const cn_appl_number = "2006800261626";
-  page.goto(`${feeDataUrl}?select-key:shenqingh=${cn_appl_number}&token=${token}`);
+  page.goto(`${feeDataUrl}?select-key:shenqingh=${cn_appl_number}&token=${token}`, {waitUntil: 'domcontentloaded', timeout: 0});
 }
 
 (async () => {

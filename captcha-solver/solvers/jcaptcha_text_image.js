@@ -21,6 +21,11 @@ async function step(page) {
 
     // retrieve image
     const captcha = await page.$(captchaImage); 
+    await captcha.evaluate((el) => {
+        el.style.position = 'fixed';
+        el.style.top = 0;
+        el.style.left = 0;
+    });
     const base64 = await captcha.screenshot({ encoding: "base64" });
 
     // fill in credentials
@@ -62,16 +67,18 @@ export async function solve_jcaptcha_text_image(page) {
         await make_visible(page);
         success = await step(page);
 
-        await page.waitForFunction(
-            '!document.querySelector("#selectyzm_text").innerText.includes("Please click")'
-        );
-        let label = await page.$(charactersLabel);
-        let text = await page.evaluate(el => el.textContent, label);
-        if (text != "Successful verification") {
-            console.log("unsuccessful captcha");
-            success = false;
+        if (success) {
+            await page.waitForFunction(
+                '!document.querySelector("#selectyzm_text").innerText.includes("Please click")', {timeout: 0}
+            );
+            let label = await page.$(charactersLabel);
+            let text = await page.evaluate(el => el.textContent, label);
+            if (text != "Successful verification") {
+                console.log("unsuccessful captcha");
+                success = false;
+            }
         }
-
+        
         console.log("success", success);
         if (success == false) {
             await page.reload();
@@ -82,9 +89,9 @@ export async function solve_jcaptcha_text_image(page) {
 }
 
 const make_visible = async (page) => {
-    await page.waitForSelector(captchaImage);
+    await page.waitForSelector(captchaImage, {timeout: 0});
     let element = await page.$(captchaContainer);
     await element.evaluate((el) => el.classList.remove("hidden"));
-    await page.waitForSelector(captchaImage, {visible: true});
+    await page.waitForSelector(captchaImage, {visible: true, timeout: 0});
     console.log("image found");
 }
