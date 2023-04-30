@@ -5,6 +5,7 @@ import numpy as np
 
 from evaluators.ocr import OcrEvaluator
 from evaluators.clip import ClipEvaluator
+from evaluators.pattern_match import PatternMatchEvaluator
 from fastapi import FastAPI, Form
 from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
@@ -17,6 +18,7 @@ version = f"{sys.version_info.major}.{sys.version_info.minor}"
 
 clipEvaluator = ClipEvaluator()
 ocrEvaluator = OcrEvaluator()
+patternMatchEvaluator = PatternMatchEvaluator()
 
 app = FastAPI()
 origins = ["*"]
@@ -45,8 +47,16 @@ def request_clip(word: str = Form(...), images: str = Form(...)):
     return results
 
 @app.post("/ocr")
-def request_tesseract(characters: str = Form(...), image: str = Form(...)):
+def request_ocr(characters: str = Form(...), image: str = Form(...)):
     characters = json.loads(characters)
     nparr = np.fromstring(base64.b64decode(image), np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     return ocrEvaluator.evaluate(img, characters, create_images=False, show_borders=False)
+
+@app.post("/pattern-match")
+def request_pattern_match(search_image: str = Form(...), pattern_image: str = Form(...)):
+    nparr = np.fromstring(base64.b64decode(search_image), np.uint8)
+    search_image = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)
+    nparr = np.fromstring(base64.b64decode(pattern_image), np.uint8)
+    pattern_image = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)
+    return patternMatchEvaluator.evaluate(search_image, pattern_image)

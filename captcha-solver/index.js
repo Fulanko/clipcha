@@ -4,6 +4,7 @@ import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import { delay } from "./helpers.js";
 import { solve_hcaptcha } from "./solvers/hcaptcha.js";
 import { solve_jcaptcha_text_image } from "./solvers/jcaptcha_text_image.js";
+import { solve_captcha_puzzle_slide } from "./solvers/captcha_puzzle_slide.js";
 puppeteer.use(StealthPlugin());
 
 async function demo_hk(page) {
@@ -24,6 +25,11 @@ async function demo_cn(page) {
   const token = await page.evaluate(el => el.value, input);
   const cn_appl_number = "2006800261626";
   page.goto(`${feeDataUrl}?select-key:shenqingh=${cn_appl_number}&token=${token}`, {waitUntil: 'domcontentloaded', timeout: 0});
+}
+
+async function demo_cn2(page) {
+  page.goto("https://cpquery.cponline.cnipa.gov.cn/", {waitUntil: 'domcontentloaded', timeout: 0});
+  await solve_captcha_puzzle_slide(page);
 }
 
 (async () => {
@@ -50,8 +56,8 @@ async function demo_cn(page) {
       }
     });
 
-    await demo_cn(page);
-    await delay(10000);
+    await demo_cn2(page);
+    await delay(10000000);
 
     await browser.close();
 
