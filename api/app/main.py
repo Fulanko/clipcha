@@ -51,7 +51,7 @@ def request_ocr(characters: str = Form(...), image: str = Form(...)):
     characters = json.loads(characters)
     nparr = np.fromstring(base64.b64decode(image), np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-    return ocrEvaluator.evaluate(img, characters, create_images=False, show_borders=False)
+    return ocrEvaluator.evaluate(img, characters, create_images=True, show_borders=True)
 
 @app.post("/pattern-match")
 def request_pattern_match(search_image: str = Form(...), pattern_image: str = Form(...)):
