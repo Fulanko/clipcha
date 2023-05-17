@@ -2,9 +2,11 @@ import base64
 import sys
 import cv2
 import numpy as np
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
 
 from evaluators.ocr import OcrEvaluator
-from evaluators.clip import ClipEvaluator
+# from evaluators.clip import ClipEvaluator
 from evaluators.pattern_match import PatternMatchEvaluator
 from fastapi import FastAPI, Form
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,14 +15,20 @@ from io import BytesIO
 import requests
 import json
 
+session = requests.Session()
+session.verify = False
+print("TEST")
+print("TEST")
 
 version = f"{sys.version_info.major}.{sys.version_info.minor}"
 
-clipEvaluator = ClipEvaluator()
+#clipEvaluator = ClipEvaluator()
 ocrEvaluator = OcrEvaluator()
 patternMatchEvaluator = PatternMatchEvaluator()
 
+print("TEST2")
 app = FastAPI()
+print("TEST3")
 origins = ["*"]
 
 app.add_middleware(
@@ -36,15 +44,15 @@ def read_root():
     message = f"Hello world! From FastAPI running on Uvicorn with Gunicorn. Using Python {version}"
     return {"message": message}
 
-@app.post("/clip")
-def request_clip(word: str = Form(...), images: str = Form(...)):
-    images = json.loads(images)
-    results = []
-    clipEvaluator.tokenize(word)
-    for image in images:
-        file = requests.get(image['url']).content
-        results.append(clipEvaluator.evaluate(Image.open(BytesIO(file)), word, image['index']))
-    return results
+# @app.post("/clip")
+# def request_clip(word: str = Form(...), images: str = Form(...)):
+#     images = json.loads(images)
+#     results = []
+#     clipEvaluator.tokenize(word)
+#     for image in images:
+#         file = requests.get(image['url']).content
+#         results.append(clipEvaluator.evaluate(Image.open(BytesIO(file)), word, image['index']))
+#     return results
 
 @app.post("/ocr")
 def request_ocr(characters: str = Form(...), image: str = Form(...)):

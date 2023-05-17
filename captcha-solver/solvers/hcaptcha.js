@@ -32,6 +32,7 @@ async function step(frame) {
     // send requests to CLIP for each challenge
     let results = await superagent
         .post(config.apiUrl + "/clip")
+        .disableTLSCerts()
         .type("form")
         .field("word", word)
         .field("images", JSON.stringify(images));

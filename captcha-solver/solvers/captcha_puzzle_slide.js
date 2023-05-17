@@ -16,7 +16,7 @@ async function step(page) {
 }
 
 export async function solve_captcha_puzzle_slide(page) {
-    await page.waitForSelector(usernameInput);
+    await page.waitForSelector(usernameInput, {timeout: 0});
    
     // fill in credentials
     await page.click(usernameInput);
@@ -30,14 +30,16 @@ export async function solve_captcha_puzzle_slide(page) {
 
     await delay(4000);
 
-    await page.waitForSelector(captchaBackgroundElement);
+    await page.waitForSelector(captchaBackgroundElement, {timeout: 0});
+	await delay(5000);
     const captchaBackground = (await page.$eval(captchaBackgroundElement, (el) => el.getAttribute('src'))).split(",")[1];
 
-    await page.waitForSelector(captchaPatternElement);
+    await page.waitForSelector(captchaPatternElement, {timeout: 0});
     const captchaPattern = (await page.$eval(captchaPatternElement, (el) => el.getAttribute('src'))).split(",")[1];
 
     let result = await superagent
         .post(config.apiUrl + "/pattern-match")
+        .disableTLSCerts()
         .type("form")
         .field("search_image", captchaBackground)
         .field("pattern_image", captchaPattern);

@@ -35,6 +35,7 @@ async function demo_cn2(page) {
 (async () => {
   const browser = await puppeteer.launch({
     headless: false,
+    ignoreHTTPSErrors: true,
     args: [
       "--no-sandbox",
       "--disable-web-security",
@@ -42,12 +43,12 @@ async function demo_cn2(page) {
       "--disable-features=IsolateOrigins",
       "--disable-site-isolation-trials",
     ],
-    executablePath: executablePath(),
+    executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
   });
 
   try {
     const page = await browser.newPage();
-    await page.setViewport({ width: 1920, height: 1080 })
+    //await page.setViewport({ width: 1920, height: 1080 })
 
     page.on("console", async (msg) => {
       const msgArgs = msg.args();

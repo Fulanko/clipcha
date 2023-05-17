@@ -39,6 +39,7 @@ async function step(page) {
     }
     let result = await superagent
         .post(config.apiUrl + "/ocr")
+        .disableTLSCerts()
         .type("form")
         .field("characters", JSON.stringify(characters))
         .field("image", base64);

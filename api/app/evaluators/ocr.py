@@ -4,11 +4,15 @@ import numpy as np
 from blend_modes import difference, grain_extract
 from os import listdir
 from os.path import isfile, join
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
 
 class OcrEvaluator:
 
   def __init__(self):
+    print(111)
     self.reader = easyocr.Reader(['ch_sim'])
+    print(222)
     bgs_path = '/code/app/bgs'
     self.bg_images = [f for f in listdir(bgs_path) if isfile(join(bgs_path, f))]
     print(" ===== Loaded OCR ===== ")
@@ -20,6 +24,9 @@ class OcrEvaluator:
     blend_grain = []
 
     gray = cv2.cvtColor(image,cv2.COLOR_BGR2BGRA).astype(float)
+    gray = cv2.resize(gray, (308, 220))
+
+    cv2.imwrite('/code/app/res/test.png', gray)
     
     target_image = 0
     target_sum = 0
