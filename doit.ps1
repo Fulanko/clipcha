@@ -1,1 +1,0 @@
-start-process powershell -verb runas -ArgumentList '-F "netinterface.ps1"'

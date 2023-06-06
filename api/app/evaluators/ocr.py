@@ -10,9 +10,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 class OcrEvaluator:
 
   def __init__(self):
-    print(111)
     self.reader = easyocr.Reader(['ch_sim'])
-    print(222)
     bgs_path = '/code/app/bgs'
     self.bg_images = [f for f in listdir(bgs_path) if isfile(join(bgs_path, f))]
     print(" ===== Loaded OCR ===== ")
